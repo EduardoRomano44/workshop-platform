@@ -29,7 +29,7 @@ cluster_log_retention_days = 3
 fargate_namespaces = ["kube-system", "default", "development", "workshop"]
 
 # ECR Repositories
-ecr_project_names = ["spring-petshop"]
+projects = ["spring-petshop"]
 
 # Aurora PostgreSQL (dev: relaxed protection for dev workflows)
 enable_aurora                   = true

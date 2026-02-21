@@ -309,11 +309,11 @@ The platform includes an ECR module that creates container image registries for 
 
 ### Configuration
 
-Add project names to the `ecr_project_names` list in your environment tfvars file:
+Add project names to the `projects` list in your environment tfvars file:
 
 ```hcl
 # platform/environments/dev.tfvars
-ecr_project_names = ["spring-petshop", "my-api", "my-frontend"]
+projects = ["spring-petshop", "my-api", "my-frontend"]
 ```
 
 One ECR repository is created per project name.
@@ -361,6 +361,56 @@ docker push 123456789012.dkr.ecr.eu-west-1.amazonaws.com/spring-petshop:v1.0.0-R
 ```
 
 For detailed module documentation, see [platform/modules/ecr/README.md](platform/modules/ecr/README.md).
+
+## CI/CD Users (Per-Project)
+
+For each project in the `projects` list, the platform creates a dedicated IAM user with scoped permissions for CI/CD pipelines in separate repositories.
+
+### What Gets Created
+
+Each project gets:
+
+- **IAM User** named `<cluster>-<project>-ci-user` (e.g., `workshop-eks-dev-spring-petshop-ci-user`)
+- **Access Keys** for authenticating from CI/CD pipelines
+- **IAM Policy** with:
+  - ECR push permissions scoped to the project's repository
+  - EKS describe permissions for configuring `kubectl`
+- **EKS Access Entry** with `AmazonEKSEditPolicy` scoped to a namespace matching the project name
+- **Kubernetes Namespace** matching the project name
+
+### CI/CD User Outputs
+
+After applying, retrieve the CI/CD credentials:
+
+```bash
+# Get all CI user ARNs
+terraform output ci_user_arns
+
+# Get access key IDs
+terraform output ci_user_access_key_ids
+
+# Get secret access keys (sensitive)
+terraform output -json ci_user_secret_access_keys
+```
+
+### Using CI/CD Credentials in a Separate Repository
+
+Configure the access key and secret as secrets in your project's CI/CD pipeline, then:
+
+```bash
+# Authenticate with ECR
+aws ecr get-login-password --region eu-west-1 | \
+  docker login --username AWS --password-stdin <account_id>.dkr.ecr.eu-west-1.amazonaws.com
+
+# Push image
+docker push <account_id>.dkr.ecr.eu-west-1.amazonaws.com/spring-petshop:v1.0.0-RELEASE
+
+# Configure kubectl
+aws eks update-kubeconfig --region eu-west-1 --name workshop-eks-dev
+
+# Deploy to the project's namespace
+kubectl apply -f deployment.yaml -n spring-petshop
+```
 
 ## CI/CD Pipelines
 
@@ -545,6 +595,7 @@ workshop-platform/
 │   ├── iam.tf                             # IAM roles and policies
 │   ├── eks.tf                             # EKS cluster
 │   ├── ecr.tf                             # ECR registries
+│   ├── ci_users.tf                        # Per-project CI/CD users
 │   ├── fargate.tf                         # Fargate profiles
 │   ├── helm-charts.tf                     # AWS LB Controller
 │   ├── variables.tf                       # Input variables

@@ -29,7 +29,7 @@ cluster_log_retention_days = 7
 fargate_namespaces = ["kube-system", "default", "staging", "workshop"]
 
 # ECR Repositories
-ecr_project_names = []
+projects = []
 
 # Aurora PostgreSQL (staging: production-like with moderate retention)
 enable_aurora                   = true

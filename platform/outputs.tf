@@ -211,3 +211,23 @@ output "ecr_repository_arns" {
   description = "Map of project names to ECR repository ARNs"
   value       = length(module.ecr) > 0 ? module.ecr[0].repository_arns : {}
 }
+
+# ============================================================================
+# CI/CD User Outputs
+# ============================================================================
+
+output "ci_user_arns" {
+  description = "Map of project names to CI user ARNs"
+  value       = { for name, user in aws_iam_user.ci : name => user.arn }
+}
+
+output "ci_user_access_key_ids" {
+  description = "Map of project names to CI user access key IDs"
+  value       = { for name, key in aws_iam_access_key.ci : name => key.id }
+}
+
+output "ci_user_secret_access_keys" {
+  description = "Map of project names to CI user secret access keys"
+  value       = { for name, key in aws_iam_access_key.ci : name => key.secret }
+  sensitive   = true
+}

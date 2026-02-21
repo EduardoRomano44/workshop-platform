@@ -94,8 +94,8 @@ variable "fargate_namespaces" {
   default     = ["kube-system", "default"]
 }
 
-variable "ecr_project_names" {
-  description = "List of project names to create ECR repositories for"
+variable "projects" {
+  description = "List of project names to create ECR repositories and CI/CD users for"
   type        = list(string)
   default     = []
 }
