@@ -231,3 +231,12 @@ output "ci_user_secret_access_keys" {
   value       = { for name, key in aws_iam_access_key.ci : name => key.secret }
   sensitive   = true
 }
+
+# ============================================================================
+# External Secrets Operator Outputs
+# ============================================================================
+
+output "external_secrets_role_arn" {
+  description = "IAM role ARN for External Secrets Operator IRSA"
+  value       = aws_iam_role.external_secrets.arn
+}

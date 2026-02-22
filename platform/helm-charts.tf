@@ -50,6 +50,14 @@ resource "helm_release" "aws_load_balancer_controller" {
     value = aws_vpc.main.id
   }
 
+  # On Fargate, controller pods take longer to start. Setting failurePolicy
+  # to Ignore prevents the webhook from blocking Service creation while the
+  # controller is coming up.
+  set {
+    name  = "serviceMutatorWebhookConfig.failurePolicy"
+    value = "Ignore"
+  }
+
   depends_on = [
     #kubernetes_service_account.aws_load_balancer_controller,
     aws_eks_addon.coredns

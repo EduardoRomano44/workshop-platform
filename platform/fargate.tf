@@ -33,7 +33,7 @@ resource "aws_eks_fargate_profile" "default" {
 }
 
 resource "aws_eks_fargate_profile" "additional" {
-  for_each = toset([for ns in var.fargate_namespaces : ns if ns != "kube-system" && ns != "default"])
+  for_each = toset([for ns in concat(var.fargate_namespaces, var.projects) : ns if ns != "kube-system" && ns != "default"])
 
   cluster_name           = aws_eks_cluster.main.name
   fargate_profile_name   = each.value
